@@ -81,8 +81,12 @@ class Esp32IdfModule(reactContext: ReactApplicationContext) :
             bluetoothDevices[serviceUuid] = device
             Log.d(TAG, "Add service UUID : $serviceUuid")
 
+            val deviceList = arrayListOf<Map<String,String>>()
+            bluetoothDevices.keys.forEach { uuid ->
+              deviceList.add(mapOf("deviceName" to bluetoothDevices[uuid]!!.name, "serviceUuid" to uuid))
+            }
             val params =
-                mapOf("deviceName" to scanRecord!!.deviceName, "serviceUuid" to serviceUuid)
+                mapOf("scanResults" to deviceList)
             sendEvent(EVENT_SCAN_BLE, Arguments.makeNativeMap(params))
           }
         }
