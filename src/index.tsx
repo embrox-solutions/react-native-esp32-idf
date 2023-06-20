@@ -4,6 +4,7 @@ import {
 	EmitterSubscription,
 	AppState,
 	AppStateStatus,
+	Platform
 } from 'react-native';
 import { useEffect, useState, useRef } from 'react'
 
@@ -293,15 +294,18 @@ export function useProvisioning({
 		console.log('Added listeners')
 		eventEmitter.addListener('scanBle', (event) => {
 			console.log('Event scanBle', event)
-			if (event instanceof Array) {
-				setBleDevices(event)
-			} else if ((event as BleDevice).deviceName) {
+
+			const mapped = Platform.OS === 'android' ? event.scanResults : event;
+
+			if (mapped instanceof Array) {
+				setBleDevices(mapped)
+			} else if ((mapped as BleDevice).deviceName) {
 				setBleDevices((prev) =>
-					prev.some((it) => it.serviceUuid === (event as BleDevice).serviceUuid)
+					prev.some((it) => it.serviceUuid === (mapped as BleDevice).serviceUuid)
 						? prev
-						: prev.concat(event as BleDevice)
+						: prev.concat(mapped as BleDevice)
 				)
-			} else if ((event as BleScanEvent).status === 0) {
+			} else if ((mapped as BleScanEvent).status === 0) {
 				setLoading(false)
 				setStatus(msg.current.scanBleFailed)
 			} else {
