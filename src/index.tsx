@@ -57,9 +57,12 @@ export interface BleDevice {
 	deviceName: string
 	serviceUuid: string
 }
+export interface AndroidScanResult {
+	scanResults: BleDevice[]
+}
 
 type BleScanEventListener = (
-	event: BleScanEvent | BleDevice | BleDevice[]
+	event: AndroidScanResult | BleScanEvent | BleDevice | BleDevice[]
 ) => void
 
 export interface EspEventEmitter extends NativeEventEmitter {
@@ -293,13 +296,15 @@ export function useProvisioning({
 	useEffect(() => {
 		console.log('Added listeners')
 		eventEmitter.addListener('scanBle', (event) => {
-			console.log('Event scanBle', event)
+			console.log('Event scanBle', JSON.stringify(event))
 
-			const mapped = Platform.OS === 'android' ? event.scanResults : event;
+			const mapped = Platform.OS === 'android' ? ( event.scanResults !== undefined ? event.scanResults : event )  : event;
 
 			if (mapped instanceof Array) {
+				console.log("1")
 				setBleDevices(mapped)
 			} else if ((mapped as BleDevice).deviceName) {
+				console.log("2")
 				setBleDevices((prev) =>
 					prev.some((it) => it.serviceUuid === (mapped as BleDevice).serviceUuid)
 						? prev
@@ -308,7 +313,8 @@ export function useProvisioning({
 			} else if ((mapped as BleScanEvent).status === 0) {
 				setLoading(false)
 				setStatus(msg.current.scanBleFailed)
-			} else {
+			} 
+			else {
 				setLoading(false)
 				if (!isConnecting.current) setStatus('')
 			}
@@ -407,4 +413,3 @@ function doneStep(message: string, failed = false): ProvisioningStepStatus {
 		message,
 	}
 }
-

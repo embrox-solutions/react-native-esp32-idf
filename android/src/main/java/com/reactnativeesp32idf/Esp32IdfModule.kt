@@ -74,16 +74,19 @@ class Esp32IdfModule(reactContext: ReactApplicationContext) :
           Log.d(TAG, "====== onPeripheralFound ===== " + device.name)
           var serviceUuid: String? = null
           val scanRecord = scanResult.scanRecord
+
+          val deviceName = device.name
+
           if (scanRecord?.serviceUuids != null && scanRecord.serviceUuids.size > 0) {
             serviceUuid = scanRecord.serviceUuids[0].toString()
           }
           if (serviceUuid != null && !bluetoothDevices.containsKey(serviceUuid)) {
-            bluetoothDevices[serviceUuid] = device
+            bluetoothDevices[deviceName] = device
             Log.d(TAG, "Add service UUID : $serviceUuid")
 
             val deviceList = arrayListOf<Map<String,String>>()
-            bluetoothDevices.keys.forEach { uuid ->
-              deviceList.add(mapOf("deviceName" to bluetoothDevices[uuid]!!.name, "serviceUuid" to uuid))
+            bluetoothDevices.keys.forEach { name ->
+              deviceList.add(mapOf("deviceName" to name, "serviceUuid" to bluetoothDevices[name]!!.getUuids()[0].toString()))
             }
             val params =
                 mapOf("scanResults" to deviceList)
