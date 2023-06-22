@@ -62,7 +62,7 @@ export interface AndroidScanResult {
 }
 
 type BleScanEventListener = (
-	event: AndroidScanResult | BleScanEvent | BleDevice | BleDevice[]
+	event: any | BleScanEvent | BleDevice | BleDevice[]
 ) => void
 
 export interface EspEventEmitter extends NativeEventEmitter {
