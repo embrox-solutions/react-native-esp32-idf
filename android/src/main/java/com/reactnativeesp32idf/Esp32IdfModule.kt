@@ -59,7 +59,7 @@ class Esp32IdfModule(reactContext: ReactApplicationContext) :
       ESPProvisionManager.getInstance(reactApplicationContext)
     }
 
-    private val bluetoothDevices: HashMap<String, BluetoothDevice> = HashMap()
+    private val bluetoothDevices: HashMap<String, Pair<BluetoothDevice, String>> = HashMap()
     private val bleScanListener: BleScanListener =
       object : BleScanListener {
         override fun scanStartFailed() {
@@ -80,13 +80,13 @@ class Esp32IdfModule(reactContext: ReactApplicationContext) :
           if (scanRecord?.serviceUuids != null && scanRecord.serviceUuids.size > 0) {
             serviceUuid = scanRecord.serviceUuids[0].toString()
           }
-          if (serviceUuid != null && !bluetoothDevices.containsKey(serviceUuid)) {
-            bluetoothDevices[deviceName] = device
+          if (serviceUuid != null && !bluetoothDevices.containsKey(deviceName)) {
+            bluetoothDevices[deviceName] = Pair(device, serviceUuid)
             Log.d(TAG, "Add service UUID : $serviceUuid")
 
             val deviceList = arrayListOf<Map<String,String>>()
             bluetoothDevices.keys.forEach { name ->
-              deviceList.add(mapOf("deviceName" to name, "serviceUuid" to bluetoothDevices[name]!!.getUuids()[0].toString()))
+              deviceList.add(mapOf("deviceName" to name, "serviceUuid" to bluetoothDevices[name]!!.second))
             }
             val params =
                 mapOf("scanResults" to deviceList)
@@ -153,9 +153,9 @@ class Esp32IdfModule(reactContext: ReactApplicationContext) :
   }
 
   @ReactMethod
-  fun connectDevice(uuid: String, pop: String?, p: Promise) {
-    if (!bluetoothDevices.containsKey(uuid)) {
-      p.reject("NO_DEVICE", "Can't find the device: $uuid.")
+  fun connectDevice(name: String, pop: String?, p: Promise) {
+    if (!bluetoothDevices.containsKey(name)) {
+      p.reject("NO_DEVICE", "Can't find the device: $name.")
     }
     p.resolve(true)
     val security =
@@ -166,7 +166,10 @@ class Esp32IdfModule(reactContext: ReactApplicationContext) :
     if (pop != null) {
       espDevice.proofOfPossession = pop
     }
-    espDevice.connectBLEDevice(bluetoothDevices[uuid], uuid)
+
+    const pair = bluetoothDevices[name]
+
+    espDevice.connectBLEDevice(pair.first, pair.second)
   }
 
     override fun getName(): String {

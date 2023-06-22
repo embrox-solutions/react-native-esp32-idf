@@ -223,7 +223,11 @@ export function useProvisioning({
 		console.log('Connect to device:', bleDevice, pop)
 		setStatus(message.connectDevice)
 		currentDevice.current = bleDevice
-		RNEsp32Idf.connectDevice(bleDevice.serviceUuid, pop)
+		if(Platform.OS === 'android') {
+			RNEsp32Idf.connectDevice(bleDevice.deviceName, pop)
+		} else {
+			RNEsp32Idf.connectDevice(bleDevice.serviceUuid, pop)
+		}
 	}
 
 	function configWifi(wifi: WifiAP) {
