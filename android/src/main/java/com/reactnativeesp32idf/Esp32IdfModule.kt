@@ -167,7 +167,7 @@ class Esp32IdfModule(reactContext: ReactApplicationContext) :
       espDevice.proofOfPossession = pop
     }
 
-    const pair = bluetoothDevices[name]
+    val pair = bluetoothDevices[name]!!
 
     espDevice.connectBLEDevice(pair.first, pair.second)
   }
