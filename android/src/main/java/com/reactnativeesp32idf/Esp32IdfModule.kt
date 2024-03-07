@@ -80,7 +80,7 @@ class Esp32IdfModule(reactContext: ReactApplicationContext) :
           if (scanRecord?.serviceUuids != null && scanRecord.serviceUuids.size > 0) {
             serviceUuid = scanRecord.serviceUuids[0].toString()
           }
-          if (serviceUuid != null && !bluetoothDevices.containsKey(deviceName)) {
+          if (deviceName != null && serviceUuid != null && !bluetoothDevices.containsKey(deviceName)) {
             bluetoothDevices[deviceName] = Pair(device, serviceUuid)
             Log.d(TAG, "Add service UUID : $serviceUuid")
 
